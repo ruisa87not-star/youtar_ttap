@@ -1,0 +1,23 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><title>UTAR login layout fixture</title>
+<style>
+  html,body{margin:0;padding:0;font-family:"Times New Roman",serif;background:white}
+  #university-banner{width:950px;height:141px;margin:0 auto;background:#dce6ce;text-align:center}
+  h2{margin:15px 0 10px;font:28.8px/20px Georgia,serif;text-align:center;color:#900}
+  form{margin-top:46.8px}form table{width:45%;margin:0 auto;border-collapse:collapse;table-layout:fixed}
+  td{height:24px;box-sizing:border-box;border:1px solid #999b69;padding:2px 3px;font:10px/15px Verdana,sans-serif;background:#f6f6e8}
+  td:first-child:not([colspan]){width:45%;text-align:right;font-weight:bold;background:#999b69;color:white}
+  input:not([type=submit]):not([type=reset]){width:204px;max-width:96%;height:20px;box-sizing:border-box}
+  .captcha{height:43px;width:170px;max-width:96%;display:block;border:1px solid #777;background:#ddd;color:#222;text-align:center;font-size:18px;line-height:41px}
+  .captcha-row td{height:67px}input[type=submit],input[type=reset]{height:20px}
+  #server-clock{text-align:center;line-height:23.4px}
+  #unrelated-announcement{width:45%;margin:8px auto 0;height:800px;background:#eee;vertical-align:top}
+</style></head><body>
+<div id="body_col"><table id="university-banner"><tr><td>University banner fixture</td></tr></table><h2>Course Registration System</h2></div>
+<div><form action="loginProSurvey.jsp" method="post"><table cellpadding="0" cellspacing="0">
+<tr><td>STUDENT ID :</td><td><input name="reqFregkey" aria-label="Student ID" autocomplete="off"></td></tr>
+<tr><td>PASSWORD :</td><td><input type="password" name="reqPassword" aria-label="Password" autocomplete="off"></td></tr>
+<tr class="captcha-row"><td>CODE :<br>TYPE THE CODE SHOWN ABOVE</td><td><strong class="captcha">Sample code</strong><input name="kaptchafield" aria-label="Code"></td></tr>
+<tr><td colspan="2" style="text-align:center"><input type="submit" value="Login"><input type="reset" value="Reset"></td></tr>
+</table></form></div><div id="server-clock"><strong>Server time: fixture</strong></div>
+<table id="unrelated-announcement"><tr><td>Unrelated announcement fixture</td></tr></table>
+</body></html>

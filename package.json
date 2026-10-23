@@ -1,0 +1,64 @@
+{
+  "name": "youtar_ttap",
+  "version": "0.5.1-beta.1",
+  "private": true,
+  "type": "module",
+  "description": "youtar_ttap — a UTAR timetable planner for the web and Windows",
+  "author": "ruisa87not-star",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24.15.0"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "dev:web": "vite",
+    "build:web": "vite build && node scripts/copy-web-notices.mjs",
+    "preview:web": "vite preview",
+    "dev:desktop": "install-electron && electron-vite dev",
+    "build:desktop": "install-electron && electron-vite build",
+    "package:win": "npm run build:desktop && electron-builder --win --dir --publish never",
+    "release:win": "npm run build:desktop && electron-builder --win nsis --x64 --publish never",
+    "test:installer": "node scripts/playwright.mjs test --config playwright.installer.config.ts",
+    "test:e2e:web": "node scripts/playwright.mjs test --project=web-chromium --project=web-firefox",
+    "test:e2e:desktop": "node scripts/playwright.mjs test --project=desktop",
+    "check": "npm run typecheck && npm run lint && npm test",
+    "install:browsers": "node scripts/playwright.mjs install chromium firefox",
+    "test:e2e": "node scripts/playwright.mjs test",
+    "lint": "oxlint --deny-warnings src tests scripts *.config.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@testing-library/jest-dom": "7.0.1",
+    "@testing-library/react": "16.3.3",
+    "@testing-library/user-event": "14.6.8",
+    "@types/node": "^24.0.0",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "electron": "45.0.0",
+    "electron-builder": "26.15.3",
+    "electron-vite": "6.0.0",
+    "jsdom": "30.1.3",
+    "oxlint": "1.89.0",
+    "typescript": "7.0.2",
+    "vite": "8.3.5",
+    "vitest": "5.0.5"
+  },
+  "dependencies": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "optionalDependencies": {
+    "@rolldown/binding-win32-x64-msvc": "1.2.14",
+    "lightningcss-win32-x64-msvc": "1.33.0"
+  },
+  "main": "./out/main/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ruisa87not-star/youtar_ttap.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ruisa87not-star/youtar_ttap/issues"
+  }
+}

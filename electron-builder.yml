@@ -1,0 +1,30 @@
+appId: youtar_ttap
+productName: youtar_ttap
+copyright: Copyright (c) 2026 ruisa87not-star
+asar: true
+electronDist: node_modules/electron/dist
+directories:
+  output: release
+files:
+  - out/**
+  - package.json
+  - LICENSE
+  - UPSTREAM.md
+  - THIRD_PARTY_NOTICES.txt
+  - src/assets/fork-logo.png
+  - '!node_modules/**'
+win:
+  icon: src/assets/fork-logo.png
+  target: dir
+  executableName: youtar_ttap
+nsis:
+  artifactName: youtar_ttap-Setup-${version}-${arch}.${ext}
+  oneClick: false
+  perMachine: false
+  allowElevation: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: youtar_ttap
+  runAfterFinish: false
+  deleteAppDataOnUninstall: false

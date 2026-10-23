@@ -1,0 +1,15 @@
+export type Result<T> = { ok: true; value: T } | { ok: false; errors: string[] };
+export type Meeting = { day: number; startMinute: number; endMinute: number; weeks: number[]; room: string };
+export type ClassOption = { id: string; courseCode: string; type: string; number: string; group: string; meetings: Meeting[]; remark?: string; classMode?: string; classSize?: string };
+export type Course = { code: string; name: string; creditHours?: number; classes: ClassOption[] };
+export type BlockedPeriod = { day: number; startMinute: number; endMinute: number };
+export type Selection = { courseCodes: string[]; lockedClassIds: string[]; blocked: BlockedPeriod[] };
+export type Project = { schemaVersion: 1; sources: string[]; courses: Course[]; selection: Selection };
+export type HtmlSource = { name: string; text: string };
+export type ImportIssue = { source: string; row?: number; courseCode?: string; message: string };
+export type ImportResult = { sources: string[]; courses: Course[]; issues: ImportIssue[] };
+export type SolveInput = { courses: Course[]; selection: Selection };
+export type Timetable = { classIds: string[] };
+export type SolveResult = { solutions: Timetable[]; truncated: boolean };
+export type FileOutcome<T> = { status: 'ok'; value: T } | { status: 'cancelled' } | { status: 'error'; message: string };
+export type ExportReceipt = { kind: 'saved' | 'downloaded'; name: string };
