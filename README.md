@@ -23,7 +23,12 @@
 
 ## 使用 Windows 版
 
-Electron beta 安裝檔已在[此 repository 的 GitHub Releases](https://github.com/ruisa87not-star/youtar_ttap/releases)提供，檔名為 youtar_ttap-Setup-版本-x64.exe。Tauri 本輪先產出本機安裝檔，尚未公開發佈。使用者安裝後從開始功能表啟動，無須 Node.js。
+Windows beta 安裝檔的下載位置為[此 repository 的 GitHub Releases](https://github.com/ruisa87not-star/youtar_ttap/releases)。`0.6.0-beta.1` 提供兩種 Windows x64 安裝檔：
+
+- **Tauri：** `youtar_ttap-Tauri-Setup-0.6.0-beta.1-x64.exe`，安裝檔較小，使用系統 WebView2；缺少 runtime 時需要網路下載。
+- **Electron：** `youtar_ttap-Setup-0.6.0-beta.1-x64.exe`，內附 Chromium，下載較大。
+
+兩種版本功能相同，可並存；安裝後從開始功能表啟動，無須 Node.js 或 Rust。更新內容、驗證與已知限制見 [0.6.0-beta.1 發佈說明](docs/releases/v0.6.0-beta.1.md)，下載後可用 Release 附帶的 `SHA256SUMS.txt` 核對檔案。
 
 開發者完成本機打包後，也可雙擊 [Start-youtar_ttap.cmd](Start-youtar_ttap.cmd)。啟動器只讀取本專案的 release/win-unpacked/youtar_ttap.exe；不存在或舊於原始碼時，會以已安裝的 Node.js／依賴重新打包。建置失敗會停止，不開啟舊產物。
 

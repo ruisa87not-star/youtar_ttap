@@ -1,6 +1,6 @@
 [package]
 name = "youtar_ttap_tauri"
-version = "0.5.1-beta.1"
+version = "0.6.0-beta.1"
 description = "UTAR timetable planner for Windows WebView2"
 authors = ["ruisa87not-star"]
 license = "MIT"

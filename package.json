@@ -1,6 +1,6 @@
 {
   "name": "youtar_ttap",
-  "version": "0.5.1-beta.1",
+  "version": "0.6.0-beta.1",
   "private": true,
   "type": "module",
   "description": "youtar_ttap — a UTAR timetable planner for the web and Windows",
