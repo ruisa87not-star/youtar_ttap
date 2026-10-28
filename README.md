@@ -1,5 +1,22 @@
 # youtar_ttap
 
+## 下載 Windows 安裝程式
+
+目前版本：**v0.6.0-beta.1（Beta）**。點下方連結即可直接下載 `.exe`，無須先開啟 Release 或 tag。
+
+| 版本 | 直接下載 | 安裝檔大小 |
+| --- | --- | ---: |
+| **Tauri（推薦，下載較小）** | **[下載 Tauri 安裝程式](https://github.com/ruisa87not-star/youtar_ttap/releases/download/v0.6.0-beta.1/youtar_ttap-Tauri-Setup-0.6.0-beta.1-x64.exe)** | **2.25 MB** |
+| Electron（內附 Chromium） | **[下載 Electron 安裝程式](https://github.com/ruisa87not-star/youtar_ttap/releases/download/v0.6.0-beta.1/youtar_ttap-Setup-0.6.0-beta.1-x64.exe)** | 114.05 MB |
+
+**安裝方式：**適用 Windows x64。下載其中一個安裝程式並執行，完成後從開始功能表啟動；不需要安裝 Node.js 或 Rust。兩種版本可並存。
+
+Tauri 使用系統 WebView2；缺少 runtime 時，安裝過程需要網路下載。目前兩個版本均未簽章，Windows 可能顯示未知發行者／SmartScreen 提示。
+
+[下載 SHA-256 校驗碼](https://github.com/ruisa87not-star/youtar_ttap/releases/download/v0.6.0-beta.1/SHA256SUMS.txt) · [查看版本說明與其他下載](https://github.com/ruisa87not-star/youtar_ttap/releases/tag/v0.6.0-beta.1)
+
+## 關於本應用
+
 由 ruisa87not-star 獨立開發與維護的 UTAR 排課工具，提供 **Web 版**、**Windows x64 Electron 版**及 **Windows x64 Tauri 版**。三個版本共用介面、HTML 匯入、排課核心、衝突檢查及 PNG 選課指引。
 
 本應用包含移植及改寫自 [Wong Jia Hau 的 TTAP](https://github.com/wongjiahau/ttap-web) 的程式與測試資料；詳見 [UPSTREAM.md](UPSTREAM.md)。本應用由社群獨立維護，實際選課仍須在 UTAR 官方系統完成。
@@ -23,10 +40,7 @@
 
 ## 使用 Windows 版
 
-Windows beta 安裝檔的下載位置為[此 repository 的 GitHub Releases](https://github.com/ruisa87not-star/youtar_ttap/releases)。`0.6.0-beta.1` 提供兩種 Windows x64 安裝檔：
-
-- **Tauri：** `youtar_ttap-Tauri-Setup-0.6.0-beta.1-x64.exe`，安裝檔較小，使用系統 WebView2；缺少 runtime 時需要網路下載。
-- **Electron：** `youtar_ttap-Setup-0.6.0-beta.1-x64.exe`，內附 Chromium，下載較大。
+使用頁首的 [Windows 安裝程式下載](#下載-windows-安裝程式) 連結即可直接取得 `.exe`；如需舊版或完整資產清單，可前往 [GitHub Releases](https://github.com/ruisa87not-star/youtar_ttap/releases)。
 
 兩種版本功能相同，可並存；安裝後從開始功能表啟動，無須 Node.js 或 Rust。更新內容、驗證與已知限制見 [0.6.0-beta.1 發佈說明](docs/releases/v0.6.0-beta.1.md)，下載後可用 Release 附帶的 `SHA256SUMS.txt` 核對檔案。
 
