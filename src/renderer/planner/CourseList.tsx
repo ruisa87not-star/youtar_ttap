@@ -8,6 +8,9 @@ export function CourseList({project,onChange,availability}:{project:Project;onCh
   const[search,setSearch]=useState('');const selected=new Set(project.selection.courseCodes);
   const[groups,setGroups]=useState<{code:string;left:number;top:number}|null>(null);const statusId=useId();
   const chosen=project.courses.find(c=>c.code===groups?.code&&selected.has(c.code));
+  const hasClash=(code:string)=>!selected.has(code)&&availability?.[code]===false;
+  const visibleCourses=project.courses.filter(c=>(c.code+' '+c.name).toLowerCase().includes(search.toLowerCase()))
+    .sort((a,b)=>Number(hasClash(a.code))-Number(hasClash(b.code)));
   const groupTop=groups?`min(${groups.top}px, max(16px, calc(100dvh - 360px)))`:'16px';
   function toggle(code:string){
     const next=new Set(selected);if(next.has(code))next.delete(code);else next.add(code);
@@ -15,7 +18,7 @@ export function CourseList({project,onChange,availability}:{project:Project;onCh
     onChange({...project.selection,courseCodes:[...next],lockedClassIds:project.selection.lockedClassIds.filter(id=>validIds.has(id))});
   }
   return <><div className="panel-heading"><div className="course-heading"><h2>Courses</h2></div><span>{project.courses.length}</span></div><div className="course-controls"><input className="search-input" type="search" aria-label="Search courses" placeholder="Search code or course name" value={search} onChange={e=>setSearch(e.target.value)}/><button disabled={!selected.size} onClick={()=>{setGroups(null);onChange({...project.selection,courseCodes:[],lockedClassIds:[]});}}>Clear</button></div>
-    <div className="course-list">{project.courses.filter(c=>(c.code+' '+c.name).toLowerCase().includes(search.toLowerCase())).map(c=>{
+    <div className="course-list">{visibleCourses.map(c=>{
       const isSelected=selected.has(c.code);
       const available=availability?.[c.code];const disabled=!isSelected&&available!==true;const reasonId=statusId+'-'+project.courses.indexOf(c);
       return <article className={'course-card tone-'+project.courses.indexOf(c)%6+(isSelected?' selected':'')} key={c.code}>

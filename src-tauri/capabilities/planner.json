@@ -1,0 +1,7 @@
+{
+  "identifier":"planner-capability",
+  "description":"Only the local planner can access native timetable operations.",
+  "local":true,
+  "webviews":["planner"],
+  "permissions":["core:event:allow-listen","core:event:allow-unlisten","allow-planner-commands"]
+}

@@ -1,0 +1,20 @@
+# Allowlist: credentials, fixtures, Git, caches and desktop outputs never enter context.
+**
+!package.json
+!package-lock.json
+!LICENSE
+!UPSTREAM.md
+!THIRD_PARTY_NOTICES.txt
+!scripts/
+!scripts/build-proxy.mjs
+!server/
+!server/**
+!src/
+!src/shared/
+!src/shared/**
+!src/renderer/
+!src/renderer/registration/
+!src/renderer/registration/proxyBridge.ts
+!deploy/
+!deploy/registration-proxy/
+!deploy/registration-proxy/Dockerfile

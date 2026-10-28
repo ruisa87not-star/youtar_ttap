@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 import {readFile,writeFile} from 'node:fs/promises';
-import {demo,configure,waitForTimetable,downloadImage,importFixturePlan,importPlan,expectPrimaryActionInViewport,schoolDayProject,expectSchoolDayInViewport} from './helpers';
+import {demo,configure,waitForTimetable,downloadImage,importFixturePlan,importPlan,expectPrimaryActionInViewport,schoolDayProject,expectSchoolDayInViewport,courseOrderingProject} from './helpers';
 
 test.beforeEach(async({page})=>{const login=await readFile('tests/fixtures/registration-web-login.html','utf8');await page.route('https://unitreg.utar.edu.my/**',route=>route.fulfill({contentType:'text/html',body:login}));await page.goto('/');await page.getByRole('button',{name:'Skip tutorial'}).click();});
 
@@ -152,11 +152,12 @@ test('course and timetable text remain readable at a laptop viewport',async({pag
   await page.screenshot({path:info.outputPath('workbench-generated.png')});
 });
 
-test('imports the archived td/Mode and spanned-Remark layout with both meetings',async({page})=>{
+for(const sample of [{name:'archived td/Mode and spanned-Remark',file:'student-td-mode.html',code:'TEST1013',count:1},{name:'current Lecturer/Tutor and prerequisite-table',file:'student-lecturer.html',code:'TEST2013',count:2}])test(`imports the ${sample.name} layout with both meetings`,async({page},info)=>{
   await page.getByRole('button',{name:'Add slots manually'}).click();
-  await page.getByRole('button',{name:'Paste HTML'}).click();await page.getByLabel('UTAR course HTML').fill(await readFile('tests/fixtures/student-td-mode.html','utf8'));
-  await page.getByRole('button',{name:'Preview import'}).click();await expect(page.getByText('1 courses',{exact:true})).toBeVisible();await page.getByRole('button',{name:'Use these courses'}).click();await page.getByRole('checkbox',{name:/^TEST1013 /}).check();
+  await page.getByRole('button',{name:'Paste HTML'}).click();await page.getByLabel('UTAR course HTML').fill(await readFile('tests/fixtures/'+sample.file,'utf8'));
+  await page.getByRole('button',{name:'Preview import'}).click();await expect(page.getByText(`${sample.count} courses`,{exact:true})).toBeVisible();await page.getByRole('button',{name:'Use these courses'}).click();await page.getByRole('checkbox',{name:new RegExp('^'+sample.code+' ')}).check();
   await expect(page.getByText('Option 1 of 1')).toBeVisible();const timetable=page.getByRole('region',{name:'Weekly timetable'});await expect(timetable.getByRole('button',{name:/Lecture group 1, 09:00/})).toBeVisible();await expect(timetable.getByRole('button',{name:/Lecture group 1, 10:00/})).toBeVisible();
+  if(sample.count===2){await page.getByRole('checkbox',{name:/^TEST2023 /}).check();await expect(timetable.getByRole('button',{name:/Practical group 1, 15:00/})).toBeVisible();await expect(timetable.getByRole('button',{name:/Practical group 1, 16:00/})).toBeVisible();await downloadImage(page,info.outputPath('lecturer-table.png'));}
 });
 
 test('course edits check clashes immediately and export the selected option as a PNG guide',async({page},info)=>{
@@ -206,17 +207,19 @@ test('narrow layout supports keyboard course selection and panel changes',async(
   await page.getByRole('button',{name:'Conditions',exact:true}).click();await expect(page.getByText('No clashes. Your selected courses fit together.')).toBeVisible();await page.getByRole('button',{name:'Timetable',exact:true}).click();await expect(page.getByRole('region',{name:'Weekly timetable'})).toContainText('TEST1013');await expect(page.getByRole('button',{name:'Timetable',exact:true})).toHaveAttribute('aria-pressed','true');
 });
 
-test('clashing courses are disabled in place and selected-course arrows open a bounded group flyout',async({page},info)=>{
-  const plan=schoolDayProject();plan.courses[0].classes[0].meetings=[{day:1,startMinute:540,endMinute:600,weeks:[1],room:'Room A'}];
-  const second=structuredClone(plan.courses[0]);second.code='CLASH1001';second.name='Conflicting course';second.classes[0].courseCode=second.code;second.classes[0].id=JSON.stringify([second.code,'L','1','1']);plan.courses.push(second);
+test('clashing courses move below available courses and selected-course arrows open a bounded group flyout',async({page},info)=>{
+  const plan=courseOrderingProject();
   await page.setViewportSize({width:1280,height:720});await importPlan(page,plan);
   const clash=page.getByRole('checkbox',{name:'CLASH1001 Conflicting course'});await expect(clash).toBeDisabled();await expect(clash.locator('xpath=ancestor::article').locator('.course-clash')).toHaveText('Course Clash');
+  const codes=()=>page.getByRole('checkbox').evaluateAll(inputs=>inputs.map(input=>input.getAttribute('aria-label')!.split(' ')[0]));
+  await expect.poll(codes).toEqual(['DAY1001','FREE1001','CLASH1001']);
   await expect(page.getByRole('button',{name:'Generate',exact:true})).toHaveCount(0);await expect(page.getByRole('button',{name:'Open project'})).toHaveCount(0);await expect(page.locator('.planner-actions').getByRole('button',{name:'Export image'})).toBeEnabled();
   await page.getByRole('button',{name:'Choose groups for DAY1001'}).click();const dialog=page.getByRole('dialog',{name:'Groups for DAY1001'});
   const card=await page.getByRole('checkbox',{name:'DAY1001 Full school day'}).locator('xpath=ancestor::article').boundingBox();expect((await dialog.boundingBox())!.x).toBeGreaterThan(card!.x+card!.width-20);
   await expect(dialog.getByLabel('Lecture for DAY1001')).toBeVisible();await page.screenshot({path:info.outputPath('course-groups.png')});
   await page.setViewportSize({width:320,height:667});const box=await dialog.boundingBox();expect(box!.x).toBeGreaterThanOrEqual(0);expect(box!.x+box!.width).toBeLessThanOrEqual(320);expect(box!.y+box!.height).toBeLessThanOrEqual(667);
   await page.keyboard.press('Escape');await page.setViewportSize({width:1280,height:720});await page.getByRole('checkbox',{name:'DAY1001 Full school day'}).uncheck();await expect(clash).toBeEnabled();
+  await expect.poll(codes).toEqual(['CLASH1001','DAY1001','FREE1001']);
 });
 
 test('long course group selectors stay inside the screen and can scroll to the final choice',async({page})=>{

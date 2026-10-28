@@ -1,0 +1,33 @@
+{
+  "$schema":"https://schema.tauri.app/config/2",
+  "productName":"youtar_ttap (Tauri)",
+  "version":"0.5.1-beta.1",
+  "identifier":"com.ruisa87not-star.youtar-ttap.tauri",
+  "build":{
+    "beforeDevCommand":"npm run build:tauri:frontend && npm run dev:tauri:frontend",
+    "devUrl":"http://127.0.0.1:1420",
+    "beforeBuildCommand":"npm run build:tauri:frontend && node scripts/tauri-notices.mjs",
+    "frontendDist":"../dist-tauri"
+  },
+  "app":{
+    "windows":[],
+    "security":{
+      "capabilities":["planner-capability"],
+      "csp":"default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: http://asset.localhost; font-src 'self'; connect-src ipc: http://ipc.localhost; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'",
+      "devCsp":"default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: http://asset.localhost; font-src 'self'; connect-src ipc: http://ipc.localhost http://127.0.0.1:1420 ws://127.0.0.1:1420; worker-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    }
+  },
+  "bundle":{
+    "active":true,
+    "targets":["nsis"],
+    "icon":["icons/icon.ico"],
+    "copyright":"Copyright (c) 2026 ruisa87not-star",
+    "license":"MIT",
+    "resources":{"../LICENSE":"LICENSE","../THIRD_PARTY_NOTICES.txt":"THIRD_PARTY_NOTICES.txt","../UPSTREAM.md":"UPSTREAM.md","../licenses/tauri/":"licenses/tauri/"},
+    "windows":{
+      "minimumWebview2Version":"120.0.2210.91",
+      "webviewInstallMode":{"type":"downloadBootstrapper","silent":true},
+      "nsis":{"installMode":"currentUser","languages":["English","TradChinese","SimpChinese"],"displayLanguageSelector":false}
+    }
+  }
+}

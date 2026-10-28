@@ -7,8 +7,32 @@ const v2 = readFileSync('tests/fixtures/student-v2.html', 'utf8');
 const v1 = readFileSync('tests/fixtures/student-v1.html', 'utf8');
 const page = readFileSync('tests/fixtures/paginated.html', 'utf8');
 const tdMode = readFileSync('tests/fixtures/student-td-mode.html', 'utf8');
+const lecturer = readFileSync('tests/fixtures/student-lecturer.html', 'utf8');
 const parse = (text: string) => parseUtarHtml([{ name: 'test.html', text }]);
 describe('UTAR course pages', () => {
+  it('reports an official No Record Found row as unavailable without inventing an incomplete class',()=>{
+    const html=lecturer.replace(/<\/table><\/div>\s*$/,'<tr><td colspan="12">NONE0001 - UNAVAILABLE COURSE [1]</td></tr><tr><td colspan="12">No Record Found!!!</td></tr></table></div>');
+    const r=parse(html);expect(r.courses).toHaveLength(2);expect(r.issues).toEqual([{source:'Import',courseCode:'NONE0001',message:'NONE0001: no classes are listed; excluded from planning.'}]);
+  });
+  it('imports the current Lecturer/Tutor column without shifting room, weeks or spanned remarks',()=>{
+    const r=parse(lecturer);expect(r.issues).toEqual([]);expect(r.courses).toHaveLength(2);
+    const course=r.courses[0];expect(course.classes).toHaveLength(2);
+    expect(course.classes[0]).toMatchObject({type:'L',classMode:'Physical',classSize:'40',remark:'Synthetic lecture note'});
+    expect(course.classes[0].meetings).toEqual([
+      {day:1,startMinute:540,endMinute:600,weeks:[1,2,3],room:'KA101'},
+      {day:4,startMinute:600,endMinute:660,weeks:[1,2,3],room:'KA102'},
+    ]);
+    expect(course.classes[1].remark).toBe('Synthetic tutorial note');
+    expect(r.courses[1].classes.find(c=>c.type==='P')?.meetings).toHaveLength(2);
+  });
+  it('recognizes a course heading containing a nested prerequisite table without treating its th as column headings',()=>{
+    const legacy=lecturer.replace(/<td class="lecturer">[\s\S]*?<\/td>/g,'').replaceAll('colspan="12"','colspan="11"');
+    const r=parse(legacy);expect(r.issues).toEqual([]);expect(r.courses.map(c=>c.code)).toEqual(['TEST2013','TEST2023']);
+  });
+  it('still excludes a current-layout class and course when a declared continuation is missing',()=>{
+    const r=parse(lecturer.replace(/<tr id="subRow1">[\s\S]*?<\/tr>/,''));
+    expect(r.courses.map(c=>c.code)).toEqual(['TEST2023']);expect(r.issues.some(i=>/incomplete class group/.test(i.message))).toBe(true);
+  });
   it('recognizes archived td/Mode headings and the five-cell continuation under a spanned Remark', () => {
     const r=parse(tdMode);expect(r.issues).toEqual([]);expect(r.courses).toHaveLength(1);
     expect(r.courses[0].classes).toHaveLength(2);expect(r.courses[0].classes[0]).toMatchObject({classMode:'OTL',classSize:'40',remark:'Bring a notebook'});

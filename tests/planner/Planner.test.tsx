@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {act,render,screen,within} from '@testing-library/react';
+import {act,render,screen,waitFor,within} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {beforeEach,expect,it,vi} from 'vitest';
 import {Planner} from '../../src/renderer/planner/Planner';
@@ -12,6 +12,15 @@ const solver=vi.hoisted(()=>({solve:vi.fn(),availability:vi.fn(),cancel:vi.fn(),
 vi.mock('../../src/workers/SolverClient',()=>({SolverClient:class {solve=solver.solve;availability=solver.availability;cancel=solver.cancel;dispose=solver.dispose;}}));
 beforeEach(()=>{vi.clearAllMocks();solver.availability.mockImplementation(async input=>courseAvailability(input));solver.solve.mockImplementation(async input=>solveTimetables(input));});
 function Harness({initial=makeProject()}:{initial?:Project}){const[p,setP]=useState(initial);return <Planner project={p} onChange={setP}/>;}
+it('reorders actual course availability after selection and Clear without changing the course catalog',async()=>{
+  const p=makeProject();p.courses.unshift({code:'CLASH1001',name:'Conflicting course',classes:[makeClass({courseCode:'CLASH1001'})]});p.courses.push({code:'FREE1001',name:'Available course',classes:[makeClass({courseCode:'FREE1001',meetings:[makeMeeting({day:5})]})]});
+  const codes=()=>screen.getAllByRole('checkbox').map(input=>input.getAttribute('aria-label')!.split(' ')[0]);
+  render(<Harness initial={p}/>);const clash=screen.getByRole('checkbox',{name:/^CLASH1001 /});
+  await waitFor(()=>expect(clash).toBeDisabled());await screen.findByText('Course Clash');expect(codes()).toEqual(['TEST1013','FREE1001','CLASH1001']);
+  await userEvent.click(screen.getByRole('button',{name:'Clear'}));await waitFor(()=>expect(clash).toBeEnabled());expect(codes()).toEqual(['CLASH1001','TEST1013','FREE1001']);
+  await userEvent.click(clash);await waitFor(()=>expect(screen.getByRole('checkbox',{name:/^TEST1013 /})).toBeDisabled());expect(codes()).toEqual(['CLASH1001','FREE1001','TEST1013']);
+  expect(p.courses.map(c=>c.code)).toEqual(['CLASH1001','TEST1013','FREE1001']);
+});
 it('hides and reopens the course sidebar without changing selected classes',async()=>{
   render(<Harness/>);await userEvent.click(screen.getByRole('button',{name:'Choose groups for TEST1013'}));await userEvent.selectOptions(screen.getByLabelText('Lecture for TEST1013'),makeProject().courses[0].classes[0].id);await userEvent.click(screen.getByRole('button',{name:'Close group selection'}));
   await userEvent.click(screen.getByRole('button',{name:'Collapse course sidebar'}));

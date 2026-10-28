@@ -1,0 +1,5 @@
+{
+  "alloc-stdlib-LICENSE.txt": "https://raw.githubusercontent.com/dropbox/rust-alloc-no-stdlib/0a81fd6928ea3b33c8cd484aa4575d50ffb98012/LICENSE",
+  "webview2-LICENSE.txt": "https://raw.githubusercontent.com/wravery/webview2-rs/edc2caf886175ccaebe86078c9cfe1ae2a187328/LICENSE",
+  "MPL-2.0.txt": "Unmodified LICENSE from cssparser 0.37.0 in the locked crates.io archive; https://www.mozilla.org/en-US/MPL/2.0/"
+}

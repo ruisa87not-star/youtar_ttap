@@ -10,10 +10,12 @@ import {createDemoProject} from './import/demoProject';
 import {version} from '../../package.json';
 import {renderRegistrationImage} from './planner/registrationImage';
 import logo from '../assets/fork-logo.png';
+import type {RegistrationProxyConfig} from '../shared/registrationProxy';
+import {configuredRegistrationProxy} from './registration/proxyConfig';
 
 type View='tutorial'|'import'|'planner';
 
-export function App(){
+export function App({registrationProxy=configuredRegistrationProxy}:{registrationProxy?:RegistrationProxyConfig}={}){
   const [project,setProject]=useState<Project|null>(null);
   const [candidate,setCandidate]=useState<{project:Project;timetable:Timetable|undefined}|null>(null);
   const onTimetableChange=useCallback((source:Project,timetable:Timetable|undefined)=>setCandidate({project:source,timetable}),[]);
@@ -78,7 +80,7 @@ export function App(){
       {error&&!pending&&<p className="error app-message" role="alert">{error}</p>}{notice&&<p className="app-message" role="status">{notice}</p>}
       {view==='tutorial'&&<div className="screen-view" data-view="tutorial"><Tutorial onDone={finishTutorial}/></div>}
       <div className="screen-view registration-home" data-view="import" hidden={view!=='import'}>{project?<div className="import-back"><div><h1 tabIndex={-1}>Import courses.</h1><p>Importing replaces the courses in this project.</p></div><button onClick={()=>navigate('planner')}>Back to planner</button></div>:<div className="home-heading"><h1 tabIndex={-1}>Plan your semester.</h1><p>Sign in to UTAR, import your courses, then build your timetable.</p></div>}
-        <RegistrationScreen suspended={view!=='import'||manual||!!pending||!!download} onSource={source=>{setRegistrationSources([source]);setImportKey(k=>k+1);setManual(true);}}/>
+        <RegistrationScreen registrationProxy={registrationProxy} suspended={view!=='import'||manual||!!pending||!!download} onSource={source=>{setRegistrationSources([source]);setImportKey(k=>k+1);setManual(true);}}/>
         <div className="home-actions"><button onClick={()=>{setRegistrationSources(undefined);setManual(true);}}>Add slots manually</button><button className="primary" onClick={()=>replace(createDemoProject())}>Try demo</button></div>
       </div>
       {project&&<div className="screen-view" data-view="planner" hidden={view!=='planner'}><Planner project={project} onChange={setProject} onTimetableChange={onTimetableChange} onExport={()=>exportCurrent()} exporting={busy} exported={!dirty}/></div>}

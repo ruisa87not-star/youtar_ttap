@@ -1,3 +1,4 @@
+import {loginCSS} from '../shared/registrationScripts';
 import {session,WebContentsView,type BrowserWindow} from 'electron';
 import type {FileOutcome,HtmlSource} from '../shared/model';
 import {UTAR_REGISTRATION_URL,type RegistrationBounds,type RegistrationStatus} from '../shared/registration';
@@ -15,24 +16,19 @@ export function isRegistrationURL(value:string):boolean{
   try{const url=new URL(value);return url.origin==='https://unitreg.utar.edu.my'&&!url.username&&!url.password;}catch{return false;}
 }
 export function isScheduleURL(value:string):boolean{
-  return isRegistrationURL(value)&&new URL(value).pathname==='/portal/courseRegStu/schedule/masterSchedule.jsp';
+  return isRegistrationURL(value)&&['/portal/courseRegStu/schedule/masterSchedule.jsp','/portal/courseRegStu/schedule/masterScheduleSurvey.jsp'].includes(new URL(value).pathname);
+}
+function upgradeRegistrationURL(value:string):string|undefined{
+  try{
+    const url=new URL(value);
+    if(url.origin!=='http://unitreg.utar.edu.my'||url.username||url.password)return;
+    url.protocol='https:';
+    return url.href;
+  }catch{return;}
 }
 
 // Presentation only: keep UTAR's real form, scripts, CAPTCHA and submission intact.
-const loginCSS=`
-  html, body { margin:0 !important; padding:0 !important; min-width:0 !important; background:white; }
-  body { padding:12px 0 8px !important; }
-  #body_col { width:100% !important; }
-  #body_col > table:not(:has(:is([role=alert],.error,.error-message,.login-error,.alert-danger,.text-danger,#errorMessage,#errorMsg,#error-message,font[color="red" i],font[color="#ff0000" i]))), body > br, body > table:not(:has(:is([role=alert],.error,.error-message,.login-error,.alert-danger,.text-danger,#errorMessage,#errorMsg,#error-message,font[color="red" i],font[color="#ff0000" i]))) { display:none !important; }
-  #body_col h2 { margin:0 0 32px !important; text-align:center; font-size:32px; font-weight:400; }
-  body > div:not(#body_col):not(:has(form)):not(:has(>strong)):not(:is([role=alert],.error,.error-message,.login-error,.alert-danger,.text-danger,#errorMessage,#errorMsg,#error-message)):not(:has(:is([role=alert],.error,.error-message,.login-error,.alert-danger,.text-danger,#errorMessage,#errorMsg,#error-message,font[color="red" i],font[color="#ff0000" i]))) { display:none !important; }
-  form { margin:0; }
-  form > table { width:calc(100% - 32px) !important; max-width:824px; table-layout:fixed; }
-  form input:not([type=hidden]):not([type=submit]):not([type=reset]) { width:min(256px, 96%); box-sizing:border-box; }
-  form img { max-width:96%; height:auto; }
-  body > div:has(>strong) { margin-top:8px; text-align:center; }
-  @media(max-width:480px) { #body_col h2 { font-size:24px; margin-bottom:20px !important; } form > table { width:calc(100% - 12px) !important; } form td { overflow-wrap:anywhere; } }
-`;
+
 
 export function createRegistrationView(window:BrowserWindow):RegistrationPort{
   let view:WebContentsView|undefined;let loading=false;let error='';let loginError='';let generation=0;let reading=false;
@@ -42,10 +38,10 @@ export function createRegistrationView(window:BrowserWindow):RegistrationPort{
     const id=generation;reading=true;
     void wc.executeJavaScript(`(${readLoginError.toString()})(document)`).then((value:unknown)=>{if(id===generation&&!wc.isDestroyed()&&wc.getURL()===url)loginError=typeof value==='string'?value.slice(0,500):'';}).catch(()=>{/* The original form and UTAR dialogs remain available. */}).finally(()=>{reading=false;});
   }
-  function load(){
+  function load(url=UTAR_REGISTRATION_URL){
     if(!view||view.webContents.isDestroyed())return;
     const id=++generation;loading=true;error='';loginError='';
-    void view.webContents.loadURL(UTAR_REGISTRATION_URL).catch(()=>{if(id===generation){loading=false;if(!error)error='UTAR could not be loaded. Check your connection and choose Reload.';}});
+    void view.webContents.loadURL(url).catch(()=>{if(id===generation){loading=false;if(!error)error='UTAR could not be loaded. Check your connection and choose Reload.';}});
   }
   function open(){
     if(view&&!view.webContents.isDestroyed())return;
@@ -56,9 +52,17 @@ export function createRegistrationView(window:BrowserWindow):RegistrationPort{
     view=new WebContentsView({webPreferences:{session:isolated,sandbox:true,contextIsolation:true,nodeIntegration:false,webSecurity:true,allowRunningInsecureContent:false,webviewTag:false}});
     view.setBackgroundColor('#ffffff');view.setVisible(false);window.contentView.addChildView(view);
     const wc=view.webContents;
-    const guard=(event:Electron.Event,url:string)=>{if(!isRegistrationURL(url)){event.preventDefault();error='This page tried to leave the UTAR registration website. Use Reload to return.';view?.setVisible(false);}};
+    const guard=(event:Electron.Event,url:string)=>{
+      if(isRegistrationURL(url))return;
+      event.preventDefault();
+      // UTAR's successful login currently sends a same-host HTTP 302. Cancel
+      // that request before following it; keep its private token only in memory.
+      const secure=upgradeRegistrationURL(url);
+      if(secure){load(secure);return;}
+      error='This page tried to leave the UTAR registration website. Use Reload to return.';view?.setVisible(false);
+    };
     wc.on('will-navigate',guard);wc.on('will-redirect',guard);
-    wc.setWindowOpenHandler(({url})=>{if(isRegistrationURL(url))void wc.loadURL(url).catch(()=>{error='The UTAR page could not be loaded.';});return {action:'deny'};});
+    wc.setWindowOpenHandler(({url})=>{const secure=isRegistrationURL(url)?url:upgradeRegistrationURL(url);if(secure)load(secure);return {action:'deny'};});
     wc.on('did-start-loading',()=>{++generation;loading=true;error='';loginError='';});
     wc.on('did-stop-loading',()=>{loading=false;});
     wc.on('did-navigate',(_event,_url,code,text)=>{if(code>=400){error=`UTAR returned HTTP ${code}${text?' '+String(text).slice(0,100):''}. Choose Reload to try again.`;view?.setVisible(false);}});

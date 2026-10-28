@@ -2,8 +2,13 @@ import {useEffect,useRef,useState} from 'react';
 import type {HtmlSource} from '../../shared/model';
 import {UTAR_REGISTRATION_URL,type RegistrationStatus} from '../../shared/registration';
 import {WebRegistrationFrame} from './WebRegistrationFrame';
+import {ProxyRegistrationFrame} from './ProxyRegistrationFrame';
+import type {RegistrationProxyConfig} from '../../shared/registrationProxy';
 
-export function RegistrationScreen({onSource,suspended}:{onSource:(source:HtmlSource)=>void;suspended:boolean}){
+export function RegistrationScreen(props:{onSource:(source:HtmlSource)=>void;suspended:boolean;registrationProxy?:RegistrationProxyConfig}){
+  return !window.ttap&&props.registrationProxy?<ProxyRegistrationFrame config={props.registrationProxy} suspended={props.suspended} onSource={props.onSource}/>:<OfficialRegistrationScreen {...props}/>;
+}
+function OfficialRegistrationScreen({onSource,suspended}:{onSource:(source:HtmlSource)=>void;suspended:boolean}){
   const slot=useRef<HTMLDivElement>(null);const[status,setStatus]=useState<RegistrationStatus>({loading:true,error:''});
   const[error,setError]=useState('');const[busy,setBusy]=useState(false);const bridge=window.ttap;
   const request=useRef(0);
@@ -40,6 +45,7 @@ export function RegistrationScreen({onSource,suspended}:{onSource:(source:HtmlSo
     <div className="registration-toolbar"><div><h2>Course Registration System</h2><p>Sign in below, then open Course Timetable Preview.</p></div><div className="actions">
       {!bridge&&<button aria-pressed={fullPage} onClick={()=>setFullPage(value=>!value)}>{fullPage?'Compact login':'Show full page'}</button>}<button onClick={()=>{if(bridge)void reload();else{frameLoaded.current=false;setFullPage(false);setStatus({loading:true,error:''});setFrameKey(n=>n+1);}}}>Reload</button>{bridge&&<button className="primary" disabled={busy} onClick={preview}>{busy?'Reading page…':'Preview courses from this page'}</button>}
     </div></div>
+    {!bridge&&<p className="registration-status">Full Web login requires the registration proxy. Otherwise, import saved HTML.</p>}
     {error&&<p className="error" role="alert">{error}</p>}
     {status.loginError&&<p className="error registration-login-error" role="alert">UTAR: {status.loginError}</p>}
     {bridge?<><p className="registration-status" role="status">{status.loading?'Loading the official UTAR website…':status.error?'Choose Reload to try again.':'UTAR website · Your login stays in this isolated view.'}</p>

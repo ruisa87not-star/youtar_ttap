@@ -11,7 +11,10 @@
   },
   "scripts": {
     "test": "vitest run",
-    "typecheck": "tsc --noEmit",
+    "build:proxy": "node scripts/build-proxy.mjs",
+    "test:e2e:proxy": "npm run build:proxy && node scripts/playwright.mjs test --config playwright.proxy.config.ts",
+    "start:proxy": "node --use-system-ca server/registration-proxy/main.ts",
+    "typecheck": "tsc --noEmit && tsc --project tsconfig.proxy.json",
     "dev:web": "vite",
     "build:web": "vite build && node scripts/copy-web-notices.mjs",
     "preview:web": "vite preview",
@@ -25,10 +28,21 @@
     "check": "npm run typecheck && npm run lint && npm test",
     "install:browsers": "node scripts/playwright.mjs install chromium firefox",
     "test:e2e": "node scripts/playwright.mjs test",
-    "lint": "oxlint --deny-warnings src tests scripts *.config.ts"
+    "lint": "oxlint --deny-warnings src server tests scripts *.config.ts",
+    "dev:tauri:frontend": "vite --mode tauri --config vite.tauri.config.ts",
+    "build:tauri:frontend": "vite build --mode tauri --config vite.tauri.config.ts",
+    "dev:tauri": "node scripts/tauri.mjs dev",
+    "build:tauri": "node scripts/tauri.mjs build --no-bundle",
+    "package:tauri": "node scripts/tauri.mjs build --bundles nsis",
+    "test:tauri:rust": "npm run build:tauri:frontend && node scripts/tauri.mjs cargo test",
+    "lint:tauri": "npm run build:tauri:frontend && node scripts/tauri.mjs cargo clippy --all-targets -- -D warnings",
+    "test:e2e:tauri": "node scripts/playwright.mjs test --config playwright.tauri.config.ts",
+    "fmt:tauri": "node scripts/tauri.mjs cargo fmt --check"
   },
   "devDependencies": {
     "@playwright/test": "1.64.1",
+    "@tauri-apps/api": "2.12.4",
+    "@tauri-apps/cli": "2.12.4",
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.3",
     "@testing-library/user-event": "14.6.8",
@@ -46,8 +60,10 @@
     "vitest": "5.0.5"
   },
   "dependencies": {
+    "parse5": "8.0.1",
     "react": "19.3.1",
-    "react-dom": "19.3.1"
+    "react-dom": "19.3.1",
+    "tough-cookie": "6.0.2"
   },
   "optionalDependencies": {
     "@rolldown/binding-win32-x64-msvc": "1.2.14",

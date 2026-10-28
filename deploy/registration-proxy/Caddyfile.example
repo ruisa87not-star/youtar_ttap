@@ -1,0 +1,25 @@
+# Dedicated proxy ingress draft. Caddy stays on the host; it manages its own TLS.
+# Do not merge the global logging block into another service without review.
+{
+  log default {
+    output discard
+  }
+}
+{$REGISTRATION_HOST} {
+  log {
+    output discard
+  }
+  header Cache-Control "no-store"
+  request_body {
+    max_size 16KB
+  }
+  reverse_proxy 127.0.0.1:3000 {
+    header_up Host {host}
+    header_up X-Forwarded-For {remote_host}
+    header_up -X-Forwarded-Host
+    transport http {
+      dial_timeout 5s
+      response_header_timeout 20s
+    }
+  }
+}

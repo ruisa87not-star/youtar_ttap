@@ -1,0 +1,32 @@
+# Draft only. Do not start until the documented deployment gates are approved.
+# Exactly one instance; no shared session store or persistent volume is configured.
+services:
+  registration-proxy:
+    build:
+      context: ../..
+      dockerfile: deploy/registration-proxy/Dockerfile
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:-node:24-bookworm-slim}
+    environment:
+      PLANNER_ORIGIN: ${PLANNER_ORIGIN:?Set the exact HTTPS planner origin}
+      PROXY_PUBLIC_ORIGIN: ${PROXY_PUBLIC_ORIGIN:?Set the exact HTTPS proxy origin}
+      PROXY_BIND_HOST: 0.0.0.0
+      PROXY_PORT: 3000
+      PROXY_TRUSTED_IP: ${PROXY_TRUSTED_IP:?Verify the actual Caddy-to-container peer IP}
+    ports:
+      - "127.0.0.1:3000:3000"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 64
+    mem_limit: 256m
+    cpus: 1.0
+    restart: unless-stopped
+    logging:
+      driver: local
+      options: {max-size: "1m", max-file: "2"}
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:3000/__ttap/health',{headers:{host:new URL(process.env.PROXY_PUBLIC_ORIGIN).host}}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

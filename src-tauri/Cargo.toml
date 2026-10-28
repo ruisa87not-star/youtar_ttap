@@ -1,0 +1,36 @@
+[package]
+name = "youtar_ttap_tauri"
+version = "0.5.1-beta.1"
+description = "UTAR timetable planner for Windows WebView2"
+authors = ["ruisa87not-star"]
+license = "MIT"
+edition = "2021"
+default-run = "youtar_ttap_tauri"
+
+[lib]
+name = "youtar_ttap_tauri_lib"
+crate-type = ["rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "=2.12.5", features = ["unstable"] }
+tauri-plugin-dialog = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+base64 = "0.22"
+tempfile = "3"
+url = "2"
+tokio = { version = "1", features = ["sync", "time"] }
+
+[target.'cfg(windows)'.dependencies]
+webview2-com = "=0.39.1"
+windows = { version = "=0.62.2", features = ["Win32_Foundation"] }
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true

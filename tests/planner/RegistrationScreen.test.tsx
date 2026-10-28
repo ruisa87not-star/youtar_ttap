@@ -6,6 +6,7 @@ import type {FileOutcome,HtmlSource} from '../../src/shared/model';
 afterEach(()=>{delete window.ttap;});
 it('offers compact and full browser views without replacing the official iframe',async()=>{
   render(<RegistrationScreen onSource={vi.fn()} suspended={false}/>);
+  expect(screen.getByText(/Full Web login requires the registration proxy/)).toBeVisible();
   const frame=screen.getByTitle('UTAR Course Registration System');
   expect(frame).toHaveAttribute('scrolling','no');
   await userEvent.click(screen.getByRole('button',{name:'Show full page'}));
@@ -38,3 +39,4 @@ it('shows the actual connection problem prominently with a retry action',async()
   render(<RegistrationScreen onSource={vi.fn()} suspended={false}/>);
   expect(await screen.findByRole('alert')).toHaveTextContent('HTTP 503');expect(screen.getByRole('button',{name:'Reload'})).toBeEnabled();
 });
+it('keeps the native registration view when a Web proxy is configured',async()=>{deferred();render(<RegistrationScreen onSource={vi.fn()} suspended={false} registrationProxy={{origin:'https://registration.example.com',plannerOrigin:location.origin}}/>);expect(screen.queryByTitle('UTAR Course Registration System')).toBeNull();expect(window.ttap!.openRegistration).toHaveBeenCalledOnce();expect(screen.getByRole('button',{name:'Preview courses from this page'})).toBeVisible();await act(async()=>{});});

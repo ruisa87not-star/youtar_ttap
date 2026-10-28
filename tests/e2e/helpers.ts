@@ -21,6 +21,12 @@ export async function expectPrimaryActionInViewport(page:Page){
   const height=await page.evaluate(()=>innerHeight);
   expect(box).not.toBeNull();expect(box!.y).toBeGreaterThanOrEqual(0);expect(box!.y+box!.height).toBeLessThanOrEqual(height);
 }
+export function courseOrderingProject():Project{
+  const plan=schoolDayProject();const course=plan.courses[0];course.classes[0].meetings=[{day:1,startMinute:540,endMinute:600,weeks:[1],room:'Room A'}];
+  const clash=structuredClone(course);clash.code='CLASH1001';clash.name='Conflicting course';clash.classes[0].courseCode=clash.code;clash.classes[0].id=JSON.stringify([clash.code,'L','1','1']);
+  const free=structuredClone(course);free.code='FREE1001';free.name='Available course';free.classes[0].courseCode=free.code;free.classes[0].id=JSON.stringify([free.code,'L','1','1']);free.classes[0].meetings[0].day=2;
+  plan.courses=[clash,course,free];return plan;
+}
 export function schoolDayProject():Project{
   const code='DAY1001';const id=JSON.stringify([code,'L','1','1']);
   return {schemaVersion:1,sources:['Synthetic school-day fixture'],courses:[{code,name:'Full school day',classes:[{id,courseCode:code,type:'L',number:'1',group:'1',meetings:[{day:1,startMinute:480,endMinute:540,weeks:[1],room:'Morning room'},{day:5,startMinute:1020,endMinute:1080,weeks:[1],room:'Evening room'}]}]}],selection:{courseCodes:[code],lockedClassIds:[],blocked:[]}};

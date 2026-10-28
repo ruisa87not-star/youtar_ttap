@@ -89,6 +89,7 @@ main { display: flex; flex-direction: column; flex: 1; min-height: 0; width: 100
 .registration-slot, .registration-frame { flex: 1; width: 100%; min-width: 0; min-height: 0; border: 1px solid var(--line); border-radius: 6px; background: white; }
 .registration-web-viewport { display: flex; align-items: center; flex: 1; min-width: 0; min-height: 0; max-height: 340px; overflow-x: auto; overflow-y: hidden; overscroll-behavior: contain; border: 1px solid var(--line); border-radius: 6px; background: white; }
 .registration-web-crop { position: relative; flex-shrink: 0; overflow: clip; margin-inline: auto; }
+.registration-proxy-viewport { flex: 1; min-height: 0; min-width: 0; overflow: auto; }
 .registration-web-crop > .registration-frame { position: absolute; max-width: none; max-height: none; border: 0; border-radius: 0; transform-origin: top left; }
 .registration-error { padding: 24px; }
 .registration-error h2 { font-size: 21px; }
